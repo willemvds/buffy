@@ -65,15 +65,19 @@ func (bfy *Buffy) Bytes() []byte {
 
 func (bfy *Buffy) Since(n int) ([]byte, error) {
 	buf := *bfy.buffer.Load()
-	if n > len(buf)-1 {
+
+	if bfy.IsClosed() {
+		remainder := EmptySlice
+		if n < len(buf) {
+			remainder = buf[n:]
+		}
+
+		return remainder, io.EOF
+	}
+
+	if n >= len(buf) {
 		return EmptySlice, ErrNoBytes
 	}
 
-	var err error
-
-	if bfy.IsClosed() {
-		err = io.EOF
-	}
-
-	return buf[n:], err
+	return buf[n:], nil
 }

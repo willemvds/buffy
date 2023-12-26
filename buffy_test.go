@@ -2,6 +2,7 @@ package buffy
 
 import (
 	"bytes"
+	"io"
 	"testing"
 )
 
@@ -53,5 +54,16 @@ func TestSincePastIndex(t *testing.T) {
 
 	if !bytes.Equal(buf, expect) || err != expectErr {
 		t.Errorf("Since(%d) EXPECT (%s, %s), GOT (%s, %s)", idx, expect, expectErr, buf, err)
+	}
+}
+
+func TestSinceShouldReportEOFCorrectly(t *testing.T) {
+	bfy := New()
+	bfy.Close()
+
+	_, err := bfy.Since(0)
+
+	if err != io.EOF {
+		t.Errorf("Since(0) with Closed Buffy EXPECT EOF, GOT %s", err)
 	}
 }
